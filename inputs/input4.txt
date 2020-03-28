@@ -1,0 +1,17 @@
+name() {
+    "John"
+}
+
+cond_repeat() {
+if("aba" prefix if("bababb" prefix "aabbababb") "aba" else "bab") "true"
+else "false"
+}
+
+cond(){
+if ("y" prefix "yz") "yes" else "no"
+     + if ("y" prefix "yz") "+yes2" else "+no2"
+}
+
+name()
+cond()
+cond_repeat()
