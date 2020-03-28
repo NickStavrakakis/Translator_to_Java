@@ -7,67 +7,67 @@ parser code {:
 
 scan with {: return s.next_token(); :};
 
-terminal				COMMA, LPAREN, RPAREN, LBRACK, RBRACK;
-terminal 				IF, ELSE;
-terminal 				CONCAT;
-terminal				PREFIX;
-terminal	 			REVERSE;
-terminal String			STRING_LITERAL, IDENTIFIER;
+terminal		COMMA, LPAREN, RPAREN, LBRACK, RBRACK;
+terminal 		IF, ELSE;
+terminal 		CONCAT;
+terminal		PREFIX;
+terminal 		REVERSE;
+terminal String		STRING_LITERAL, IDENTIFIER;
 
-non terminal			program;
-non terminal String		string, if_state, if_cond;
-non terminal String		fDefns, fDefn, fDefn_title, fDefn_args;
-non terminal String		fCalls, fCall, fCall_title, fCall_args;
+non terminal		program;
+non terminal String	string, if_state, if_cond;
+non terminal String	fDefns, fDefn, fDefn_title, fDefn_args;
+non terminal String	fCalls, fCall, fCall_title, fCall_args;
 
-precedence left			COMMA, LPAREN, RPAREN;//, LBRACK, RBRACK;
-precedence left 		IF, ELSE;
-//precedence left 		PREFIX;
-precedence left 		CONCAT;
-precedence left 		REVERSE;
+precedence left		COMMA, LPAREN, RPAREN;//, LBRACK, RBRACK;
+precedence left 	IF, ELSE;
+//precedence left 	PREFIX;
+precedence left 	CONCAT;
+precedence left 	REVERSE;
 
 /* Grammar Rules for our Goal Sate */
 
-program ::=				fDefns:fDefns fCalls:fCalls								{: System.out.println("public class Main {\n\tpublic static void main(String[] args) {\n" + fCalls + "\t}\n" + fDefns + "\n}"); :};
+program ::=		fDefns:fDefns fCalls:fCalls					{: System.out.println("public class Main {\n\tpublic static void main(String[] args) {\n" + fCalls + "\t}\n" + fDefns + "\n}"); :};
 
 /* Grammar Rules for Function Defninition */
 
-fDefns ::=				fDefns:Defns fDefn:Defn									{: RESULT = Defns + '\n' + Defn; :}
-						| fDefn:Defn											{: RESULT = Defn; :};
+fDefns ::=		fDefns:Defns fDefn:Defn						{: RESULT = Defns + '\n' + Defn; :}
+			| fDefn:Defn							{: RESULT = Defn; :};
 
-fDefn ::=				fDefn_title:fTitle string:fBody RBRACK					{: RESULT = "\n\tpublic static String " + fTitle + "\n\t\treturn " + fBody + ";\n\t}"; :};
+fDefn ::=		fDefn_title:fTitle string:fBody RBRACK				{: RESULT = "\n\tpublic static String " + fTitle + "\n\t\treturn " + fBody + ";\n\t}"; :};
 
-fDefn_title ::=			IDENTIFIER:fName LPAREN RPAREN LBRACK					{: RESULT = fName + "() {"; :}
-						| IDENTIFIER:fName LPAREN IDENTIFIER:arg RPAREN LBRACK	{: RESULT = fName + "(String " + arg + ") {"; :}
-						| IDENTIFIER:fName LPAREN fDefn_args:args RPAREN LBRACK	{: RESULT = fName + "(" + args + ") {"; :};
+fDefn_title ::=		IDENTIFIER:fName LPAREN RPAREN LBRACK				{: RESULT = fName + "() {"; :}
+			| IDENTIFIER:fName LPAREN IDENTIFIER:arg RPAREN LBRACK		{: RESULT = fName + "(String " + arg + ") {"; :}
+			| IDENTIFIER:fName LPAREN fDefn_args:args RPAREN LBRACK		{: RESULT = fName + "(" + args + ") {"; :};
 
-fDefn_args ::=			IDENTIFIER:arg1 COMMA IDENTIFIER:arg2					{: RESULT = "String " + arg1 + ", String " + arg2; :}
-						| fDefn_args:args COMMA IDENTIFIER: arg_last			{: RESULT = args + ", String " + arg_last; :};
+fDefn_args ::=		IDENTIFIER:arg1 COMMA IDENTIFIER:arg2				{: RESULT = "String " + arg1 + ", String " + arg2; :}
+			| fDefn_args:args COMMA IDENTIFIER: arg_last			{: RESULT = args + ", String " + arg_last; :};
 
 /* Grammar Rules for Function Calling */
 
-fCalls ::=				fCalls:calls fCall:call									{: RESULT = calls + call; :}
-						| fCall:call											{: RESULT = call; :};
+fCalls ::=		fCalls:calls fCall:call						{: RESULT = calls + call; :}
+			| fCall:call							{: RESULT = call; :};
 
-fCall ::=				fCall_title:fTitle										{: RESULT = "\t\tSystem.out.println(" + fTitle + ");\n"; :};
+fCall ::=		fCall_title:fTitle						{: RESULT = "\t\tSystem.out.println(" + fTitle + ");\n"; :};
 
-fCall_title ::=			IDENTIFIER:fName LPAREN RPAREN							{: RESULT = fName + "()"; :}
-						| IDENTIFIER:fName LPAREN string:arg RPAREN				{: RESULT = fName + "(" + arg + ")"; :}
-						| IDENTIFIER:fName LPAREN fCall_args:args RPAREN		{: RESULT = fName + "(" + args + ")"; :};
+fCall_title ::=		IDENTIFIER:fName LPAREN RPAREN					{: RESULT = fName + "()"; :}
+			| IDENTIFIER:fName LPAREN string:arg RPAREN			{: RESULT = fName + "(" + arg + ")"; :}
+			| IDENTIFIER:fName LPAREN fCall_args:args RPAREN		{: RESULT = fName + "(" + args + ")"; :};
 
-fCall_args ::= 			string: arg1 COMMA string:arg2							{: RESULT = arg1 + ", " + arg2; :}
-						| fCall_args:arg COMMA string: arg_last 				{: RESULT = arg + ", " + arg_last; :};
+fCall_args ::= 		string: arg1 COMMA string:arg2					{: RESULT = arg1 + ", " + arg2; :}
+			| fCall_args:arg COMMA string: arg_last 			{: RESULT = arg + ", " + arg_last; :};
 
 /* Grammar Rules for If Clauses */
 
-if_state ::=			IF LPAREN if_cond:cond RPAREN string:to_do1 ELSE string:to_do2	{: RESULT = "(" + cond + " ? " + to_do1 + " : " + to_do2 + ")"; :};
+if_state ::=		IF LPAREN if_cond:cond RPAREN string:to_do1 ELSE string:to_do2	{: RESULT = "(" + cond + " ? " + to_do1 + " : " + to_do2 + ")"; :};
 
-if_cond ::=				string:str1 PREFIX string:str2									{: RESULT = "((" + str2 + ").startsWith(" + str1 + "))"; :};
+if_cond ::=		string:str1 PREFIX string:str2					{: RESULT = "((" + str2 + ").startsWith(" + str1 + "))"; :};
 
 /* Grammar Rules for every form-type of string */
 
-string ::=				fCall_title:str											{: RESULT = str; :}
-						| if_state:str											{: RESULT = str; :}
-						| IDENTIFIER:str										{: RESULT = str; :}
-						| STRING_LITERAL:str									{: RESULT = '"' + str + '"'; :}
-						| string:str1 CONCAT string:str2						{: RESULT = "(" + str1 + ") + (" + str2 +")"; :}
-						| REVERSE string:str									{: RESULT = "(new StringBuffer(" + str + ").reverse()).toString()"; :};
+string ::=		fCall_title:str							{: RESULT = str; :}
+			| if_state:str							{: RESULT = str; :}
+			| IDENTIFIER:str						{: RESULT = str; :}
+			| STRING_LITERAL:str						{: RESULT = '"' + str + '"'; :}
+			| string:str1 CONCAT string:str2				{: RESULT = "(" + str1 + ") + (" + str2 +")"; :}
+			| REVERSE string:str						{: RESULT = "(new StringBuffer(" + str + ").reverse()).toString()"; :};
